@@ -11,8 +11,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Middleware to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
-// Hardcoded API key
-const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve'; 
+// Hardcoded API key and email account IDs
+const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve';
+const EMAIL_ACCOUNT_IDS = [2907]; // Add more IDs as needed
 
 // Handle POST request from the form
 app.post('/create-campaign', async (req, res) => {
@@ -23,20 +24,28 @@ app.post('/create-campaign', async (req, res) => {
     }
 
     try {
-        const response = await axios.post(`https://server.smartlead.ai/api/v1/campaigns/create?api_key=${API_KEY}`, {
+        // Create the campaign
+        const createResponse = await axios.post(`https://server.smartlead.ai/api/v1/campaigns/create?api_key=${API_KEY}`, {
             name: name
         });
 
-        res.send(`Campaign created successfully: ${JSON.stringify(response.data)}`);
+        const campaignId = createResponse.data.id; // Adjust according to actual response structure
+
+        // Add email account IDs to the created campaign
+        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/email-accounts?api_key=${API_KEY}`, {
+            email_account_ids: EMAIL_ACCOUNT_IDS
+        });
+
+        res.send(`Campaign created successfully: ${JSON.stringify(createResponse.data)} and email accounts added.`);
     } catch (error) {
         console.error("Error:", error); // Log the complete error for debugging
 
         if (error.response) {
-            res.send(`Error creating campaign: ${error.response.data.message || JSON.stringify(error.response.data)}`);
+            res.send(`Error: ${error.response.data.message || JSON.stringify(error.response.data)}`);
         } else if (error.request) {
-            res.send('Error creating campaign: No response received from the server');
+            res.send('Error: No response received from the server');
         } else {
-            res.send(`Error creating campaign: ${error.message}`);
+            res.send(`Error: ${error.message}`);
         }
     }
 });
