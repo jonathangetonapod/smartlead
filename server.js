@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,7 +14,11 @@ app.get('/', (req, res) => {
 
 app.post('/create-campaign', async (req, res) => {
     const { name, client_id } = req.body;
-    const api_key = process.env.API_KEY; // Ensure you have your API key set in your environment variables
+    const api_key = process.env.API_KEY;
+
+    if (!api_key) {
+        return res.send('Error: API key is required.');
+    }
 
     try {
         const response = await axios.post('https://server.smartlead.ai/api/v1/campaigns/create', {
@@ -29,13 +33,10 @@ app.post('/create-campaign', async (req, res) => {
         res.send(`Campaign created successfully: ${JSON.stringify(response.data)}`);
     } catch (error) {
         if (error.response) {
-            // The request was made and the server responded with a status code that falls out of the range of 2xx
             res.send(`Error creating campaign: ${error.response.data.message || error.response.data}`);
         } else if (error.request) {
-            // The request was made but no response was received
             res.send('Error creating campaign: No response received from the server');
         } else {
-            // Something happened in setting up the request that triggered an Error
             res.send(`Error creating campaign: ${error.message}`);
         }
     }
