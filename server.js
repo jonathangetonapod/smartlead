@@ -23,20 +23,16 @@ app.post('/create-campaign', async (req, res) => {
     }
 
     try {
-        const response = await axios.post('https://server.smartlead.ai/api/v1/campaigns/create', {
+        const response = await axios.post(`https://server.smartlead.ai/api/v1/campaigns/create?api_key=${API_KEY}`, {
             name: name
-        }, {
-            headers: {
-                'Authorization': `Bearer ${API_KEY}`
-            }
         });
 
-        console.log("Request Headers:", response.config.headers); // Log headers for debugging
         res.send(`Campaign created successfully: ${JSON.stringify(response.data)}`);
     } catch (error) {
-        console.log("Error Response:", error.response ? error.response.data : "No response data");
+        console.error("Error:", error); // Log the complete error for debugging
+
         if (error.response) {
-            res.send(`Error creating campaign: ${error.response.data.message || error.response.data}`);
+            res.send(`Error creating campaign: ${error.response.data.message || JSON.stringify(error.response.data)}`);
         } else if (error.request) {
             res.send('Error creating campaign: No response received from the server');
         } else {
