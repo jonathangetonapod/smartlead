@@ -7,11 +7,37 @@
 </head>
 <body>
     <h1>Create a Smartlead Campaign</h1>
-    <form action="/create-campaign" method="post">
+    <form id="campaign-form">
         <label for="name">Campaign Name:</label>
         <input type="text" id="name" name="name" required>
         <br><br>
         <button type="submit">Create Campaign</button>
     </form>
+    <div id="response-message"></div>
+    
+    <script>
+        document.getElementById('campaign-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const responseMessage = document.getElementById('response-message');
+
+            try {
+                const response = await fetch('/create-campaign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ name: name })
+                });
+
+                const result = await response.text();
+                responseMessage.textContent = result;
+            } catch (error) {
+                responseMessage.textContent = 'Error creating campaign. Please try again.';
+                console.error('Error:', error);
+            }
+        });
+    </script>
 </body>
 </html>
