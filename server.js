@@ -1,13 +1,19 @@
-const axios = require('axios');
 const express = require('express');
+const path = require('path');
+const axios = require('axios');
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
-const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve'; // Hardcoded API key
+app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
 
+// Handle POST request from the form
 app.post('/create-campaign', async (req, res) => {
     const { name } = req.body;
+    const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve'; // Hardcoded API key
 
     if (!API_KEY) {
         return res.send('Error: API key is required.');
@@ -36,7 +42,11 @@ app.post('/create-campaign', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
+// Serve the index.html as the default page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
