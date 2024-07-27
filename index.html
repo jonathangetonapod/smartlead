@@ -96,7 +96,7 @@
                     body: new URLSearchParams({ campaign_id: result.campaign_id })
                 });
 
-                result = await response.text();
+                await response.text();
                 updateProgress(75);
 
                 response = await fetch('/schedule-campaign', {
@@ -107,7 +107,7 @@
                     body: new URLSearchParams({ campaign_id: result.campaign_id })
                 });
 
-                result = await response.text();
+                await response.text();
                 updateProgress(100);
 
                 responseMessage.textContent = 'Campaign created, email accounts added, and schedule set successfully.';
