@@ -8,12 +8,15 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+// Middleware to parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
+
+// Hardcoded API key
+const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve'; 
 
 // Handle POST request from the form
 app.post('/create-campaign', async (req, res) => {
     const { name } = req.body;
-    const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve'; // Hardcoded API key
 
     if (!API_KEY) {
         return res.send('Error: API key is required.');
