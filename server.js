@@ -76,7 +76,7 @@ app.post('/create-campaign', async (req, res) => {
         await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/schedule?api_key=${API_KEY}`, SCHEDULE_CONFIG);
 
         // Create the webhook
-        const webhookName = `GOAP_${generateRandomNumber()}`;
+        const webhookName = `GOAP Sales_${generateRandomNumber()}`;
         const webhookConfig = {
             id: null, // Set to null to create a new webhook
             name: webhookName,
