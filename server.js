@@ -82,7 +82,7 @@ app.post('/create-campaign', async (req, res) => {
             name: webhookName,
             webhook_url: "https://getonapod.app.n8n.cloud/webhook/4c818c33-2f7c-4d27-80b5-4e6799a1ef7f",
             event_types: ["LEAD_CATEGORY_UPDATED"],
-            categories: ["Interested"]
+            categories: ["Positive"]
         };
         
         await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/webhooks?api_key=${API_KEY}`, webhookConfig);
