@@ -87,6 +87,10 @@
                     body: new URLSearchParams({ name: name })
                 });
 
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+
                 let result = await response.json();
                 updateProgress(50);
 
@@ -97,6 +101,10 @@
                     },
                     body: new URLSearchParams({ campaign_id: result.campaign_id })
                 });
+
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
 
                 result = await response.text();
                 updateProgress(75);
@@ -109,6 +117,10 @@
                     body: new URLSearchParams({ campaign_id: result.campaign_id })
                 });
 
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+
                 result = await response.json();
                 updateProgress(100);
 
@@ -116,7 +128,7 @@
                 responseMessage.classList.remove('text-danger');
                 responseMessage.classList.add('text-success');
             } catch (error) {
-                responseMessage.textContent = 'Error creating campaign. Please try again.';
+                responseMessage.textContent = `Error creating campaign: ${error.message}`;
                 responseMessage.classList.remove('text-success');
                 responseMessage.classList.add('text-danger');
                 console.error('Error:', error);

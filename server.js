@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 // Hardcoded API key and email account IDs
 const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve';
 const EMAIL_ACCOUNT_IDS = [
+    // Add your email account IDs here
     2086964, 2086965, 2086966, 2086967, 2086968, 2086969, 2086970, 2086971,
     2086972, 2086973, 2086974, 2086975, 2086976, 2086977, 2086978, 2086979,
     2086980, 2086981, 2086983, 2086984, 2086985, 2086986, 2086987, 2086988,
@@ -45,7 +46,7 @@ app.post('/create-campaign', async (req, res) => {
     const { name } = req.body;
 
     if (!API_KEY) {
-        return res.send('Error: API key is required.');
+        return res.status(400).send('Error: API key is required.');
     }
 
     try {
@@ -58,7 +59,7 @@ app.post('/create-campaign', async (req, res) => {
 
         res.json({ campaign_id: campaignId });
     } catch (error) {
-        console.error("Error:", error); // Log the complete error for debugging
+        console.error("Error creating campaign:", error); // Log the complete error for debugging
 
         if (error.response) {
             res.status(500).send(`Error: ${error.response.data.message || JSON.stringify(error.response.data)}`);
@@ -82,7 +83,7 @@ app.post('/add-email-accounts', async (req, res) => {
 
         res.send(`Email accounts added to campaign ID: ${campaign_id}`);
     } catch (error) {
-        console.error("Error:", error); // Log the complete error for debugging
+        console.error("Error adding email accounts:", error); // Log the complete error for debugging
 
         if (error.response) {
             res.status(500).send(`Error: ${error.response.data.message || JSON.stringify(error.response.data)}`);
@@ -100,7 +101,7 @@ app.post('/schedule-campaign', async (req, res) => {
 
     // Scheduling configuration
     const SCHEDULE_CONFIG = {
-        timezone: "America/New_York",
+        timezone: "America/Los_Angeles",
         days_of_the_week: [1, 2, 3, 4, 5], // Monday to Friday
         start_hour: "09:00", // 9 AM
         end_hour: "17:00", // 5 PM
@@ -114,7 +115,7 @@ app.post('/schedule-campaign', async (req, res) => {
         await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/schedule?api_key=${API_KEY}`, SCHEDULE_CONFIG);
 
         // Create the webhook
-        const webhookName = `GOAP Sales_${generateRandomNumber()}`;
+        const webhookName = `GOAP_${generateRandomNumber()}`;
         const webhookConfig = {
             id: null, // Set to null to create a new webhook
             name: webhookName,
@@ -127,7 +128,7 @@ app.post('/schedule-campaign', async (req, res) => {
 
         res.json({ campaign_id: campaign_id, webhook_name: webhookName });
     } catch (error) {
-        console.error("Error:", error); // Log the complete error for debugging
+        console.error("Error scheduling campaign:", error); // Log the complete error for debugging
 
         if (error.response) {
             res.status(500).send(`Error: ${error.response.data.message || JSON.stringify(error.response.data)}`);
