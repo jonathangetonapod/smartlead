@@ -6,6 +6,9 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Log the API key to verify it's being loaded correctly
+console.log("API Key:", process.env.API_KEY);
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
