@@ -87,7 +87,7 @@
                     body: new URLSearchParams({ name: name })
                 });
 
-                let result = await response.text();
+                let result = await response.json();
                 updateProgress(50);
 
                 response = await fetch('/add-email-accounts', {
@@ -109,10 +109,10 @@
                     body: new URLSearchParams({ campaign_id: result.campaign_id })
                 });
 
-                result = await response.text();
+                result = await response.json();
                 updateProgress(100);
 
-                responseMessage.textContent = 'Campaign created, email accounts added, and schedule set successfully.';
+                responseMessage.innerHTML = `Campaign created, email accounts added, schedule set, and webhook created successfully with name: <strong>${result.webhook_name}</strong>.`;
                 responseMessage.classList.remove('text-danger');
                 responseMessage.classList.add('text-success');
             } catch (error) {
