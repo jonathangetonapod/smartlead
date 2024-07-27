@@ -30,6 +30,11 @@ const EMAIL_ACCOUNT_IDS = [
     1450497, 1450499, 1450500, 1450501, 1450502, 1450503, 1450505, 1450506
 ];
 
+// Function to get today's date in ISO format
+const getTodayISO = () => {
+    return new Date().toISOString();
+};
+
 // Handle POST request from the form
 app.post('/create-campaign', async (req, res) => {
     const { name } = req.body;
@@ -37,6 +42,17 @@ app.post('/create-campaign', async (req, res) => {
     if (!API_KEY) {
         return res.send('Error: API key is required.');
     }
+
+    // Scheduling configuration
+    const SCHEDULE_CONFIG = {
+        timezone: "America/New_York",
+        days_of_the_week: [1, 2, 3, 4, 5], // Monday to Friday
+        start_hour: "09:00", // 9 AM
+        end_hour: "17:00", // 5 PM
+        min_time_btw_emails: 7,
+        max_new_leads_per_day: 1000,
+        schedule_start_time: getTodayISO()
+    };
 
     try {
         // Create the campaign
@@ -51,7 +67,10 @@ app.post('/create-campaign', async (req, res) => {
             email_account_ids: EMAIL_ACCOUNT_IDS
         });
 
-        res.send(`Campaign created successfully: ${JSON.stringify(createResponse.data)} and email accounts added.`);
+        // Schedule the campaign
+        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/schedule?api_key=${API_KEY}`, SCHEDULE_CONFIG);
+
+        res.send(`Campaign created successfully: ${JSON.stringify(createResponse.data)}, email accounts added, and schedule set.`);
     } catch (error) {
         console.error("Error:", error); // Log the complete error for debugging
 
