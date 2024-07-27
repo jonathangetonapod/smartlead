@@ -1,25 +1,15 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
 const axios = require('axios');
-
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Log the API key to verify it's being loaded correctly
-console.log("API Key:", process.env.API_KEY);
+app.use(express.json());
 
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
+const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve'; // Hardcoded API key
 
 app.post('/create-campaign', async (req, res) => {
     const { name } = req.body;
-    const api_key = process.env.API_KEY;
 
-    if (!api_key) {
+    if (!API_KEY) {
         return res.send('Error: API key is required.');
     }
 
@@ -28,12 +18,14 @@ app.post('/create-campaign', async (req, res) => {
             name: name
         }, {
             headers: {
-                'Authorization': `Bearer ${api_key}`
+                'Authorization': `Bearer ${API_KEY}`
             }
         });
 
+        console.log("Request Headers:", response.config.headers); // Log headers for debugging
         res.send(`Campaign created successfully: ${JSON.stringify(response.data)}`);
     } catch (error) {
+        console.log("Error Response:", error.response ? error.response.data : "No response data");
         if (error.response) {
             res.send(`Error creating campaign: ${error.response.data.message || error.response.data}`);
         } else if (error.request) {
@@ -44,6 +36,7 @@ app.post('/create-campaign', async (req, res) => {
     }
 });
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
