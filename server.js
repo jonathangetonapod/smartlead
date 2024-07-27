@@ -35,6 +35,11 @@ const getTodayISO = () => {
     return new Date().toISOString();
 };
 
+// Function to generate a random number for the webhook name
+const generateRandomNumber = () => {
+    return Math.floor(Math.random() * 10000);
+};
+
 // Handle POST request from the form
 app.post('/create-campaign', async (req, res) => {
     const { name } = req.body;
@@ -70,7 +75,19 @@ app.post('/create-campaign', async (req, res) => {
         // Schedule the campaign
         await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/schedule?api_key=${API_KEY}`, SCHEDULE_CONFIG);
 
-        res.send(`Campaign created successfully: ${JSON.stringify(createResponse.data)}, email accounts added, and schedule set.`);
+        // Create the webhook
+        const webhookName = `GOAP_${generateRandomNumber()}`;
+        const webhookConfig = {
+            id: null, // Set to null to create a new webhook
+            name: webhookName,
+            webhook_url: "https://getonapod.app.n8n.cloud/webhook/4c818c33-2f7c-4d27-80b5-4e6799a1ef7f",
+            event_types: ["LEAD_CATEGORY_UPDATED"],
+            categories: ["Interested"]
+        };
+        
+        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/webhooks?api_key=${API_KEY}`, webhookConfig);
+
+        res.send(`Campaign created successfully: ${JSON.stringify(createResponse.data)}, email accounts added, schedule set, and webhook created with name: ${webhookName}.`);
     } catch (error) {
         console.error("Error:", error); // Log the complete error for debugging
 
