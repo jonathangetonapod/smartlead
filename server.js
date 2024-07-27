@@ -14,7 +14,6 @@ app.use(express.urlencoded({ extended: true }));
 // Hardcoded API key and email account IDs
 const API_KEY = '77e9e37e-4a6f-46d3-8301-e21e4f78ef01_72s72ve';
 const EMAIL_ACCOUNT_IDS = [
-    // Add your email account IDs here
     2086964, 2086965, 2086966, 2086967, 2086968, 2086969, 2086970, 2086971,
     2086972, 2086973, 2086974, 2086975, 2086976, 2086977, 2086978, 2086979,
     2086980, 2086981, 2086983, 2086984, 2086985, 2086986, 2086987, 2086988,
