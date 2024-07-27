@@ -93,35 +93,7 @@
 
                 let result = await response.json();
                 updateProgress(50);
-
-                response = await fetch('/add-email-accounts', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({ campaign_id: result.campaign_id })
-                });
-
-                if (!response.ok) {
-                    throw new Error(await response.text());
-                }
-
-                result = await response.text();
                 updateProgress(75);
-
-                response = await fetch('/schedule-campaign', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({ campaign_id: result.campaign_id })
-                });
-
-                if (!response.ok) {
-                    throw new Error(await response.text());
-                }
-
-                result = await response.json();
                 updateProgress(100);
 
                 responseMessage.innerHTML = `Campaign created, email accounts added, schedule set, and webhook created successfully with name: <strong>${result.webhook_name}</strong>.`;

@@ -40,7 +40,7 @@ const generateRandomNumber = () => {
     return Math.floor(Math.random() * 10000);
 };
 
-// Handle POST request to create a campaign
+// Handle POST request to create a campaign, add email accounts, and schedule the campaign
 app.post('/create-campaign', async (req, res) => {
     const { name } = req.body;
 
@@ -56,7 +56,38 @@ app.post('/create-campaign', async (req, res) => {
 
         const campaignId = createResponse.data.id; // Adjust according to actual response structure
 
-        res.json({ campaign_id: campaignId });
+        // Add email account IDs to the created campaign
+        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/email-accounts?api_key=${API_KEY}`, {
+            email_account_ids: EMAIL_ACCOUNT_IDS
+        });
+
+        // Scheduling configuration
+        const SCHEDULE_CONFIG = {
+            timezone: "America/Los_Angeles",
+            days_of_the_week: [1, 2, 3, 4, 5], // Monday to Friday
+            start_hour: "09:00", // 9 AM
+            end_hour: "17:00", // 5 PM
+            min_time_btw_emails: 7,
+            max_new_leads_per_day: 1000,
+            schedule_start_time: getTodayISO()
+        };
+
+        // Schedule the campaign
+        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/schedule?api_key=${API_KEY}`, SCHEDULE_CONFIG);
+
+        // Create the webhook
+        const webhookName = `GOAP_${generateRandomNumber()}`;
+        const webhookConfig = {
+            id: null, // Set to null to create a new webhook
+            name: webhookName,
+            webhook_url: "https://webhook.site/8222f684-0cf6-43ac-9360-28227fc36d32",
+            event_types: ["LEAD_CATEGORY_UPDATED"],
+            categories: ["Interested"]
+        };
+
+        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaignId}/webhooks?api_key=${API_KEY}`, webhookConfig);
+
+        res.json({ campaign_id: campaignId, webhook_name: webhookName });
     } catch (error) {
         console.error("Error creating campaign:", error); // Log the complete error for debugging
 
@@ -70,78 +101,9 @@ app.post('/create-campaign', async (req, res) => {
     }
 });
 
-// Handle POST request to add email accounts to the campaign
-app.post('/add-email-accounts', async (req, res) => {
-    const { campaign_id } = req.body;
-
-    try {
-        // Add email account IDs to the created campaign
-        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/email-accounts?api_key=${API_KEY}`, {
-            email_account_ids: EMAIL_ACCOUNT_IDS
-        });
-
-        res.send(`Email accounts added to campaign ID: ${campaign_id}`);
-    } catch (error) {
-        console.error("Error adding email accounts:", error); // Log the complete error for debugging
-
-        if (error.response) {
-            res.status(500).send(`Error: ${error.response.data.message || JSON.stringify(error.response.data)}`);
-        } else if (error.request) {
-            res.status(500).send('Error: No response received from the server');
-        } else {
-            res.status(500).send(`Error: ${error.message}`);
-        }
-    }
-});
-
-// Handle POST request to schedule the campaign
-app.post('/schedule-campaign', async (req, res) => {
-    const { campaign_id } = req.body;
-
-    // Scheduling configuration
-    const SCHEDULE_CONFIG = {
-        timezone: "America/Los_Angeles",
-        days_of_the_week: [1, 2, 3, 4, 5], // Monday to Friday
-        start_hour: "09:00", // 9 AM
-        end_hour: "17:00", // 5 PM
-        min_time_btw_emails: 7,
-        max_new_leads_per_day: 1000,
-        schedule_start_time: getTodayISO()
-    };
-
-    try {
-        // Schedule the campaign
-        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/schedule?api_key=${API_KEY}`, SCHEDULE_CONFIG);
-
-        // Create the webhook
-        const webhookName = `GOAP_${generateRandomNumber()}`;
-        const webhookConfig = {
-            id: null, // Set to null to create a new webhook
-            name: webhookName,
-            webhook_url: "https://webhook.site/8222f684-0cf6-43ac-9360-28227fc36d32",
-            event_types: ["LEAD_CATEGORY_UPDATED"],
-            categories: ["Interested"]
-        };
-
-        await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/webhooks?api_key=${API_KEY}`, webhookConfig);
-
-        res.json({ campaign_id: campaign_id, webhook_name: webhookName });
-    } catch (error) {
-        console.error("Error scheduling campaign:", error); // Log the complete error for debugging
-
-        if (error.response) {
-            res.status(500).send(`Error: ${error.response.data.message || JSON.stringify(error.response.data)}`);
-        } else if (error.request) {
-            res.status(500).send('Error: No response received from the server');
-        } else {
-            res.status(500).send(`Error: ${error.message}`);
-        }
-    }
-});
-
 // Serve the index.html as the default page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 app.listen(PORT, () => {
