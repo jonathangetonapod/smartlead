@@ -57,7 +57,7 @@
     </div>
 
     <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     
@@ -87,20 +87,36 @@
                     body: new URLSearchParams({ name: name })
                 });
 
-                if (!response.ok) {
-                    throw new Error(await response.text());
-                }
-
-                let result = await response.json();
+                let result = await response.json();  // Change .text() to .json()
                 updateProgress(50);
+
+                response = await fetch('/add-email-accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ campaign_id: result.campaign_id })
+                });
+
+                result = await response.text();
                 updateProgress(75);
+
+                response = await fetch('/schedule-campaign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ campaign_id: result.campaign_id })
+                });
+
+                result = await response.text();
                 updateProgress(100);
 
-                responseMessage.innerHTML = `Campaign created, email accounts added, schedule set, and webhook created successfully with name: <strong>${result.webhook_name}</strong>.`;
+                responseMessage.textContent = 'Campaign created, email accounts added, and schedule set successfully.';
                 responseMessage.classList.remove('text-danger');
                 responseMessage.classList.add('text-success');
             } catch (error) {
-                responseMessage.textContent = `Error creating campaign: ${error.message}`;
+                responseMessage.textContent = 'Error creating campaign. Please try again.';
                 responseMessage.classList.remove('text-success');
                 responseMessage.classList.add('text-danger');
                 console.error('Error:', error);
