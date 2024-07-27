@@ -4,16 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Smartlead Campaign</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 600px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        .btn-custom {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        #response-message {
+            margin-top: 20px;
+        }
+        .progress {
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Create a Smartlead Campaign</h1>
-    <form id="campaign-form">
-        <label for="name">Campaign Name:</label>
-        <input type="text" id="name" name="name" required>
-        <br><br>
-        <button type="submit">Create Campaign</button>
-    </form>
-    <div id="response-message"></div>
+    <div class="container">
+        <h1 class="text-center">Create a Smartlead Campaign</h1>
+        <form id="campaign-form">
+            <div class="form-group">
+                <label for="name">Campaign Name:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <button type="submit" class="btn btn-custom btn-block">Create Campaign</button>
+        </form>
+        <div id="response-message" class="text-center mt-4"></div>
+        <div class="progress">
+            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     
     <script>
         document.getElementById('campaign-form').addEventListener('submit', async function(event) {
@@ -21,9 +67,19 @@
 
             const name = document.getElementById('name').value;
             const responseMessage = document.getElementById('response-message');
+            const progressBar = document.getElementById('progress-bar');
+            const progressContainer = document.querySelector('.progress');
+
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            const updateProgress = (percent) => {
+                progressBar.style.width = `${percent}%`;
+            };
 
             try {
-                const response = await fetch('/create-campaign', {
+                updateProgress(25);
+                let response = await fetch('/create-campaign', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -31,11 +87,41 @@
                     body: new URLSearchParams({ name: name })
                 });
 
-                const result = await response.text();
-                responseMessage.textContent = result;
+                let result = await response.text();
+                updateProgress(50);
+
+                response = await fetch('/add-email-accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ campaign_id: result.campaign_id })
+                });
+
+                result = await response.text();
+                updateProgress(75);
+
+                response = await fetch('/schedule-campaign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ campaign_id: result.campaign_id })
+                });
+
+                result = await response.text();
+                updateProgress(100);
+
+                responseMessage.textContent = 'Campaign created, email accounts added, and schedule set successfully.';
+                responseMessage.classList.remove('text-danger');
+                responseMessage.classList.add('text-success');
             } catch (error) {
                 responseMessage.textContent = 'Error creating campaign. Please try again.';
+                responseMessage.classList.remove('text-success');
+                responseMessage.classList.add('text-danger');
                 console.error('Error:', error);
+            } finally {
+                progressContainer.style.display = 'none';
             }
         });
     </script>
