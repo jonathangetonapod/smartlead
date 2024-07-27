@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-campaign', async (req, res) => {
-    const { name, client_id } = req.body;
+    const { name } = req.body;
     const api_key = process.env.API_KEY;
 
     if (!api_key) {
@@ -25,8 +25,7 @@ app.post('/create-campaign', async (req, res) => {
 
     try {
         const response = await axios.post('https://server.smartlead.ai/api/v1/campaigns/create', {
-            name: name,
-            client_id: client_id || null
+            name: name
         }, {
             headers: {
                 'Authorization': `Bearer ${api_key}`
