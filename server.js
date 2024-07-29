@@ -113,6 +113,20 @@ app.post('/schedule-campaign', async (req, res) => {
         const webhookResponse = await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/webhooks?api_key=${API_KEY}`, webhookConfig);
         console.log('Webhook response:', webhookResponse.data);
 
+        const settingsConfig = {
+            track_settings: ["DONT_TRACK_EMAIL_OPEN"],
+            stop_lead_settings: "REPLY_TO_AN_EMAIL",
+            unsubscribe_text: "",
+            send_as_plain_text: true,
+            follow_up_percentage: 10,
+            client_id: null,
+            enable_ai_esp_matching: false,
+            name: ""
+        };
+
+        const settingsResponse = await axios.post(`https://server.smartlead.ai/api/v1/campaigns/${campaign_id}/settings?api_key=${API_KEY}`, settingsConfig);
+        console.log('Settings response:', settingsResponse.data);
+
         res.json({ campaign_id: campaign_id, webhook_name: webhookName });
     } catch (error) {
         console.error("Error scheduling campaign:", error);
